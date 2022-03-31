@@ -6,6 +6,8 @@ import { ExtractJwt, Strategy } from "passport-jwt";
 import { UserRepository } from "../user.repository";
 import { User } from "../entity/user.entity";
 
+import * as config from "config";
+
 export class JwtStrategy extends PassportStrategy(Strategy) {
     
     constructor(
@@ -13,7 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         private userRepository: UserRepository
     ) {
         super({
-            secretOrKey: "Secret1234",
+            secretOrKey: process.env.JWT_SECRET || config.get('jwt.secret'),
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
         })
     }

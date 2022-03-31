@@ -11,7 +11,7 @@ import { UserRepository } from "./user.repository";
 
 import * as config from "config";
 
-import jwtConfig = config.get('jwt');
+const jwtConfig = config.get('jwt');
 
 @Module({
   imports: [

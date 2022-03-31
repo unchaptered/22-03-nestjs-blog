@@ -11,8 +11,6 @@ import { BoardsModule } from "./boards/boards.module";
     TypeOrmModule.forRoot(typeORMConfig),
     BoardsModule,
     AuthModule
-  ],
-  controllers: [],
-  providers: [],
+  ]
 })
 export class AppModule {}
