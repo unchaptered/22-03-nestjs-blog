@@ -109,7 +109,7 @@ export class BoardsService {
 Nest.JS 에는 총 4가지 Middleware 가 있다.
 
 1. Pipe | 유효성 검사 등
-2. Filter | 에러 핸들링 등
+2. Filter | 에러 핸들링 등 
 3. Guards | 인증 미들웨어 등
 4. Interceptor | 응답 매핑 및 캐시 관리와 함깨 요청 로깅과 같은 전후 미들웨어
 
@@ -283,3 +283,9 @@ Passport 라는 인증 모듈과 JWT 라는 보안 토큰을 사용하여 구현
 ```
 npm i @nestjs/jwt @nestjs/passport passport passport-jwt
 ```
+
+## Logger
+
+## Config
+
+[**XML vs JSON vs YAML**](https://www.inflearn.com/questions/16184)

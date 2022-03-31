@@ -23,8 +23,7 @@ export class BoardsService {
     ): Promise<Board[]> {
         
         const queryBuilder = this.boardsRepository.createQueryBuilder("board");
-        queryBuilder.where("board.userId = userId", { userId: user.id });
-
+        queryBuilder.where('board.userId = :userId', { userId: user.id});
         const boards = await queryBuilder.getMany();
 
         return boards;
