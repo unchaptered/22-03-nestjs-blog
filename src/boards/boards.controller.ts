@@ -2,7 +2,7 @@
 
 import {
     Controller, Get, Post, Patch, Delete, Body, Param,
-    UsePipes, ValidationPipe, ParseIntPipe, UseGuards } from "@nestjs/common";
+    UsePipes, ValidationPipe, ParseIntPipe, UseGuards, Logger } from "@nestjs/common";
     import { AuthGuard } from "@nestjs/passport";
 
 // Handler
@@ -24,13 +24,18 @@ import { BoardStatusValidationPipe } from "./pipes/board.status.pipe";
 @UseGuards(AuthGuard())
 export class BoardsController {
 
+    private boardsLogger = new Logger("BoardsController");
+
     constructor( private boardsService: BoardsService ) {}
 
     @Get()
     getALlBoards(
         @GetUser() user: User
     ): Promise<Board[]> {
+
+        this.boardsLogger.verbose(`User ${user.username} trying to get all boards`);
         return this.boardsService.getAllBoards(user);
+
     }
 
     @Post()
@@ -39,7 +44,10 @@ export class BoardsController {
         @Body() createBoardDTO: CreateBoardDTO,
         @GetUser() user: User
     ): Promise<Board> {
+        
+        this.boardsLogger.verbose(`User ${user.username} trying to create board... \n BOARD : ${JSON.stringify(createBoardDTO)}`);
         return this.boardsService.createBoard(createBoardDTO, user);
+
     }
 
     @Get("/:id")
@@ -52,8 +60,11 @@ export class BoardsController {
         @Param("id") id: number,
         @GetUser() user: User
     ): Promise<void> {
+
+       this.boardsLogger.verbose(`User ${user.username} trying to delete board`);
        this.boardsService.deleteBoardById(id, user);
        return;
+
     }
 
     @Patch("/:id/status")
@@ -62,6 +73,9 @@ export class BoardsController {
         @GetUser() user: User,
         @Body("status", BoardStatusValidationPipe) boardstatus: BoardStatus
     ) {
+
+        this.boardsLogger.verbose(`User ${user.username} trying to patch board`);
         return this.boardsService.patchBoardStatus(id, boardstatus);
+
     }
 }
