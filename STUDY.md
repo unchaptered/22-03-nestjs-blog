@@ -36,6 +36,62 @@
 
 ## Nest Thoery
 
+### Module
+
+### Controller
+
+클라이언트의 요청을 받아서, 경우에 따라서 Service 등을 호출하는 기능
+
+### Service
+
+클라이언트 요청을 처리하는 실질적인 **비즈니스 로직** 이 포함
+
+```typescript
+// nest g s BoardsService
+@Injectable()
+export class BoardsService {
+    // 로직
+}
+
+// Dependency Injection
+@Controller("board")
+export class BoardsController {
+    constructor(
+        private boardsService: BoardsService
+    ) {}
+}
+```
+
+
+### Repository
+
+클라이언트 요청 중 **Database 접근이 필요한 경우의 처리** 가 포함
+
+```typescript
+// nest g cl BoardsRepository 후에 TypeORM 임포트
+import { EntityRepository, Repository } from "typeorm";
+import { Board } from "./entity/board.entity";
+
+@EntityRepository(Board)
+export class BoardsRepository extends Repository<Board> {
+    // 로직
+}
+
+// Dependency Injection
+@Injectable()
+export class BoardsService {
+
+    constructor(
+        @InjectRepository(BoardsRepository)
+        private boardsRepository: BoardsRepository
+    ) {}
+    // 로직
+}
+
+```
+
+
+
 ### DTO
 
 **Data Transfer Object 란,**
@@ -47,6 +103,27 @@
 클래스는 인터페이스와 다르게, 런타임에서 작동하기 때문에 파이프 같은 기능을 이용할 때 더 유용합니다.
 
 그래서 클래스를 사용해서 DTO 를 작성합니다.
+
+## Middleware
+
+Nest.JS 에는 총 4가지 Middleware 가 있다.
+
+1. Pipe | 유효성 검사 등
+2. Filter | 에러 핸들링 등
+3. Guards | 인증 미들웨어 등
+4. Interceptor | 응답 매핑 및 캐시 관리와 함깨 요청 로깅과 같은 전후 미들웨어
+
+이러한 Middleware 들이 불러지는 순서는 다음과 같습니다.
+
+1. guard
+2. interceptor(bef)
+3. pipe
+4. controller
+5. service
+6. controller
+7. interceptor(af)
+8. filter (if  applicable)
+9. client
 
 ### Pipe
 
@@ -190,3 +267,19 @@ TypeORM 은 다른 모델과 쉽게 통합됩니다.
 1. @Entity()
 2. @PrimaryGeneratedColumn()
 3. @Column()
+
+## Auth
+
+### bcryptjs
+
+```
+npm i bcryptjs@2.4.3
+```
+
+### JWT, json web token
+
+Passport 라는 인증 모듈과 JWT 라는 보안 토큰을 사용하여 구현할 수 있습니다.
+
+```
+npm i @nestjs/jwt @nestjs/passport passport passport-jwt
+```

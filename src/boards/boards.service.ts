@@ -1,54 +1,79 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { v1 as uuid } from 'uuid';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
 
-import { Board } from './models/board.model';
-import { BoardStatus } from './models/board.status.model';
-import { CreateBoardDTO } from './classes/create-board.dto';
+import { BoardsRepository } from "./boards.repository";
+
+import { User } from "../auth/entity/user.entity";
+
+import { Board } from "./entity/board.entity";
+import { BoardStatus } from "./entity/board-status.enum";
+import { CreateBoardDTO } from "./dtos/create-board.dto";
+import { query } from "express";
 
 @Injectable()
 export class BoardsService {
 
-    private boardList: Board[] = [];
+    constructor(
+        @InjectRepository(BoardsRepository)
+        private boardsRepository: BoardsRepository
+    ) {}
 
-    getAllBoards(): Board[] {
-        return this.boardList;
+    async getAllBoards(
+        user: User
+    ): Promise<Board[]> {
+        
+        const queryBuilder = this.boardsRepository.createQueryBuilder("board");
+        queryBuilder.where("board.userId = userId", { userId: user.id });
+
+        const boards = await queryBuilder.getMany();
+
+        return boards;
+
     }
 
-    createBoard(createBoardDTO: CreateBoardDTO): Board {
-        const { title, description } = createBoardDTO;
+    createBoard(
+        createBoardDTO: CreateBoardDTO,
+        user: User
+    ): Promise <Board> {
 
-        const board: Board = {
-            id: uuid(),
-            title,
-            description,
-            status:BoardStatus.PUBLIC
-        };
+        return this.boardsRepository.createBoard(createBoardDTO, user);
 
-        this.boardList.push(board);
-        return board;
     }
 
-    getBoardById(id: string): Board {
-        const found = this.boardList.find(board => board.id === id);
+    async getBoardById(id: number): Promise<Board> {
 
-        if (!found) {
-            throw new NotFoundException(`Can't find Board by ${id}`);
-        }
+        const found = await this.boardsRepository.findOne(id);
+        if (!found) throw new NotFoundException(`Can"t find Board by ${id}`);
 
         return found;
+        
     }
 
-    deleteBoardById(id: string): void {
-        const found = this.getBoardById(id);
+    async deleteBoardById(
+        id: number,
+        user: User
+    ): Promise<void> {
 
-        this.boardList = this.boardList.filter(board => board.id !== found.id);
+        /* delete() 와 remove() 차이
+            1. remove() 는 존재하는 아이템을 삭제, 없으면 404
+            2. delete() 는 존재하는 아이템을 삭제, 없어도 에러 X
+
+            즉, remove() 를 사용하려면 해당 data 의 존재 유무 사전 파악이 필수
+        */ 
+
+        const result = await this.boardsRepository.delete({ id, user });
+        if (result.affected === 0 ) throw new NotFoundException(`Can"t find Board by ${id}`);
+        return;
     }
 
-    // updateBoardStatus (원제목)
-    patchBoardStatus(id: string, status: BoardStatus): Board {
-        const board = this.getBoardById(id);
+    async patchBoardStatus(id: number, status: BoardStatus): Promise<Board> {
+
+        const board = await this.getBoardById(id);
         board.status = status;
+        await this.boardsRepository.save(board);
 
-        return this.boardList[0];
+        return board;
+
     }
+
 }
